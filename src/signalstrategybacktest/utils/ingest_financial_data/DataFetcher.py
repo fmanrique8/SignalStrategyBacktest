@@ -3,13 +3,19 @@
 
 import yfinance as yf
 import pandas as pd
-from pydantic import BaseModel
+import logging
+
+from signalstrategybacktest.utils.ingest_financial_data.models import BaseConfig
+from signalstrategybacktest.utils.ingest_financial_data.utils import process_data
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 class DataFetcher:
     """Class to fetch data from yfinance."""
 
-    def __init__(self, config: BaseModel):
+    def __init__(self, config: BaseConfig):
         """Initialize with configuration."""
         self.config = config
 
@@ -20,13 +26,17 @@ class DataFetcher:
         symbols = self.config.symbols
 
         for symbol in symbols:
-            ticker = yf.Ticker(symbol)
-            hist = ticker.history(interval=interval)
-            hist["Symbol"] = symbol
-            data_frames.append(hist)
+            try:
+                ticker = yf.Ticker(symbol)
+                hist = ticker.history(interval=interval)
+                if not hist.empty:
+                    hist["Symbol"] = symbol
+                    data_frames.append(hist)
+            except Exception:
+                pass  # Handle errors as needed
 
         if data_frames:
             df = pd.concat(data_frames)
-            return df
+            return process_data(df)  # Use the imported process_data function
         else:
             return pd.DataFrame()  # Return empty DataFrame if no data fetched.

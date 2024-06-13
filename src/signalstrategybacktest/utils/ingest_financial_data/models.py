@@ -2,25 +2,11 @@
 """
 
 from pydantic import BaseModel, Field
-from typing import List, Dict, Any
+from typing import List
 
 
-class CryptoConfig(BaseModel):
+class BaseConfig(BaseModel):
+    """Base configuration model."""
+
     time_interval: str = Field(..., pattern=r"^\d+[mhdw]$")
     symbols: List[str]
-
-
-class StockConfig(BaseModel):
-    time_interval: str = Field(..., pattern=r"^\d+[mhdw]$")
-    symbols: List[str]
-
-
-class ForexConfig(BaseModel):
-    time_interval: str = Field(..., pattern=r"^\d+[mhdw]$")
-    symbols: List[str]
-
-
-class Config(BaseModel):
-    crypto_configuration: Dict[str, Any]
-    stocks_configuration: Dict[str, Any]
-    forex_configuration: Dict[str, Any]
