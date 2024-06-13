@@ -1,8 +1,8 @@
 # Base Catalog
 
-stock_source_data:
+crypto_source_data:
   type: pandas.CSVDataset
-  filepath: data/01_raw/stocks/source_data.csv
+  filepath: data/01_raw/crypto/source_data.csv
   load_args:
     sep: ','
   save_args:

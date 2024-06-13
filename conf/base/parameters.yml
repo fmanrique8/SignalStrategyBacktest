@@ -1,0 +1,31 @@
+# This is a boilerplate parameters config generated for pipeline 'ingest_financial_data'
+# using Kedro 0.19.6.
+#
+# Documentation for this file format can be found in "Parameters"
+# Link: https://docs.kedro.org/en/0.19.6/configuration/parameters.html
+
+config:
+  crypto_configuration:
+    time_interval: "15m"
+    symbols:
+      - "BTC-USD"
+      - "ETH-USD"
+      - "BNB-USD"
+      - "ADA-USD"
+      - "DOGE-USD"
+  forex_configuration:
+    time_interval: "15m"
+    symbols:
+      - "EURUSD=X"
+      - "JPY=X"
+      - "GBPUSD=X"
+      - "AUDUSD=X"
+      - "USDCAD=X"
+  stocks_configuration:
+    time_interval: "15m"
+    symbols:
+      - "AAPL"
+      - "GOOGL"
+      - "MSFT"
+      - "AMZN"
+      - "TSLA"
