@@ -1,16 +1,19 @@
 """SignalStrategyBacktest
 """
 
-import yfinance as yf
 import pandas as pd
 import logging
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
 from signalstrategybacktest.utils.ingest_financial_data.exceptions import (
-    FetchError,
     ProcessError,
 )
 from signalstrategybacktest.utils.ingest_financial_data.models import BaseConfig
-from signalstrategybacktest.utils.ingest_financial_data.utils import process_data
+from signalstrategybacktest.utils.ingest_financial_data.utils import (
+    process_data,
+    async_fetch_symbol_data,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -23,28 +26,19 @@ class DataFetcher:
         """Initialize with configuration."""
         self.config = config
         self.base_config = base_config
+        self.executor = ThreadPoolExecutor(
+            max_workers=5
+        )  # Adjust the number of workers as needed
 
-    def fetch_data(self) -> pd.DataFrame:
+    async def fetch_data(self) -> pd.DataFrame:
         """Fetch data based on the configuration."""
-        data_frames = []
-        interval = self.config.time_interval
-        symbols = self.config.symbols
+        tasks = [
+            async_fetch_symbol_data(symbol, self.config.time_interval, self.executor)
+            for symbol in self.config.symbols
+        ]
+        data_frames = await asyncio.gather(*tasks)
 
-        for symbol in symbols:
-            try:
-                ticker = yf.Ticker(symbol)
-                hist = ticker.history(interval=interval)
-                if not hist.empty:
-                    hist["Symbol"] = symbol
-                    data_frames.append(hist)
-                else:
-                    raise FetchError(symbol)
-            except (ValueError, IndexError, KeyError) as e:
-                logger.error(f"Failed to fetch data for {symbol}: {e}")
-                continue
-            except Exception as e:
-                logger.error(f"Unexpected error for {symbol}: {e}")
-                continue
+        data_frames = [df for df in data_frames if not df.empty]
 
         if data_frames:
             try:
@@ -54,4 +48,4 @@ class DataFetcher:
                 logger.error(f"Data processing error: {e}")
                 raise ProcessError(e)
         else:
-            return pd.DataFrame()  # Return empty DataFrame if no data fetched.
+            return pd.DataFrame()
