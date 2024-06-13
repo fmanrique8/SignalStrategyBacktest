@@ -15,9 +15,10 @@ logger = logging.getLogger(__name__)
 class DataFetcher:
     """Class to fetch data from yfinance."""
 
-    def __init__(self, config: BaseConfig):
+    def __init__(self, config: BaseConfig, base_config: dict):
         """Initialize with configuration."""
         self.config = config
+        self.base_config = base_config
 
     def fetch_data(self) -> pd.DataFrame:
         """Fetch data based on the configuration."""
@@ -37,6 +38,6 @@ class DataFetcher:
 
         if data_frames:
             df = pd.concat(data_frames)
-            return process_data(df)  # Use the imported process_data function
+            return process_data(df, self.base_config)
         else:
             return pd.DataFrame()  # Return empty DataFrame if no data fetched.

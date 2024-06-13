@@ -16,19 +16,19 @@ def create_pipeline() -> Pipeline:
         [
             node(
                 func=fetch_data,
-                inputs="params:crypto_configuration",
+                inputs=["params:crypto_configuration", "params:base_configuration"],
                 outputs="crypto_source_data",
                 name="fetch_crypto_data",
             ),
             node(
                 func=fetch_data,
-                inputs="params:forex_configuration",
+                inputs=["params:forex_configuration", "params:base_configuration"],
                 outputs="forex_source_data",
                 name="fetch_forex_data",
             ),
             node(
                 func=fetch_data,
-                inputs="params:stocks_configuration",
+                inputs=["params:stocks_configuration", "params:base_configuration"],
                 outputs="stocks_source_data",
                 name="fetch_stocks_data",
             ),
