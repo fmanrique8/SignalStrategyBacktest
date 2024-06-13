@@ -5,6 +5,10 @@ import yfinance as yf
 import pandas as pd
 import logging
 
+from signalstrategybacktest.utils.ingest_financial_data.exceptions import (
+    FetchError,
+    ProcessError,
+)
 from signalstrategybacktest.utils.ingest_financial_data.models import BaseConfig
 from signalstrategybacktest.utils.ingest_financial_data.utils import process_data
 
@@ -33,11 +37,21 @@ class DataFetcher:
                 if not hist.empty:
                     hist["Symbol"] = symbol
                     data_frames.append(hist)
-            except Exception:
-                pass  # Handle errors as needed
+                else:
+                    raise FetchError(symbol)
+            except (ValueError, IndexError, KeyError) as e:
+                logger.error(f"Failed to fetch data for {symbol}: {e}")
+                continue
+            except Exception as e:
+                logger.error(f"Unexpected error for {symbol}: {e}")
+                continue
 
         if data_frames:
-            df = pd.concat(data_frames)
-            return process_data(df, self.base_config)
+            try:
+                df = pd.concat(data_frames)
+                return process_data(df, self.base_config)
+            except Exception as e:
+                logger.error(f"Data processing error: {e}")
+                raise ProcessError(e)
         else:
             return pd.DataFrame()  # Return empty DataFrame if no data fetched.
