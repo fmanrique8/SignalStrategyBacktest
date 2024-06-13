@@ -5,8 +5,6 @@ import yfinance as yf
 import pandas as pd
 from pydantic import BaseModel
 
-from signalstrategybacktest.utils.ingest_financial_data.utils import process_data
-
 
 class DataFetcher:
     """Class to fetch data from yfinance."""
@@ -29,6 +27,6 @@ class DataFetcher:
 
         if data_frames:
             df = pd.concat(data_frames)
-            return process_data(df)
+            return df
         else:
             return pd.DataFrame()  # Return empty DataFrame if no data fetched.
