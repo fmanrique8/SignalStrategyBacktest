@@ -17,7 +17,7 @@ def create_pipeline() -> Pipeline:
             node(
                 func=backtest_base_strategy_node,
                 inputs=["stocks_source_data", "params:base_configuration"],
-                outputs="stocks_source_data",
+                outputs="stocks_intermediate_data",
                 name="backtest_stocks_base_strategy_node",
             ),
         ]

@@ -5,5 +5,11 @@
 # Link: https://docs.kedro.org/en/0.19.6/configuration/parameters.html
 
 base_configuration:
+  initial_cash: 100000.0
+  slippage: 0.001
+  commission: 0.0005
+  currency: "USD"
   datetime_zone: "America/New_York"
+
+
 
