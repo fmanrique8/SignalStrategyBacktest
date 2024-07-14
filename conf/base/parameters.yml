@@ -13,6 +13,8 @@ base_configuration:
   risk_management:
     atr_period: 14
     support_resistance_window: 20
+    risk_per_trade: 0.01
+    distance_level: 0.02
 
 strategies_configuration:
   SmaCross:

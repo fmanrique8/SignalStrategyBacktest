@@ -43,9 +43,9 @@ class BacktestProvider:
         """Set the risk management strategy."""
         self.risk_management = risk_management
 
-    def apply_risk_management(self):
+    def apply_risk_management(self, initial_cash):
         """Apply the risk management strategy."""
         if self.risk_management:
-            self.data = self.risk_management.apply(self.data)
+            self.data = self.risk_management.apply(self.data, initial_cash)
         else:
             print("No risk management strategy set!")

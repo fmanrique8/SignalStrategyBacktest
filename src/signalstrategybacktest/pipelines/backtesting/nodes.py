@@ -34,9 +34,11 @@ def sma_cross_backtest_strategy_node(
     risk_management = RiskManagement(
         atr_period=risk_management_params["atr_period"],
         support_resistance_window=risk_management_params["support_resistance_window"],
+        risk_per_trade=risk_management_params["risk_per_trade"],
+        distance_level=risk_management_params["distance_level"],
     )
     backtest_provider.set_risk_management(risk_management)
-    backtest_provider.apply_risk_management()
+    backtest_provider.apply_risk_management(initial_cash=base_config["initial_cash"])
 
     return backtest_provider.data
 
@@ -63,8 +65,10 @@ def bollinger_bands_backtest_strategy_node(
     risk_management = RiskManagement(
         atr_period=risk_management_params["atr_period"],
         support_resistance_window=risk_management_params["support_resistance_window"],
+        risk_per_trade=risk_management_params["risk_per_trade"],
+        distance_level=risk_management_params["distance_level"],
     )
     backtest_provider.set_risk_management(risk_management)
-    backtest_provider.apply_risk_management()
+    backtest_provider.apply_risk_management(initial_cash=base_config["initial_cash"])
 
     return backtest_provider.data
