@@ -5,6 +5,7 @@ generated using Kedro 0.19.6
 
 import pandas as pd
 from signalstrategybacktest.utils.backtesting.Backtest import BacktestProvider
+from signalstrategybacktest.utils.risk_management.RiskManagement import RiskManagement
 from signalstrategybacktest.utils.technical_indicators.BollingerBands import (
     BollingerBandsStrategy,
 )
@@ -27,6 +28,14 @@ def sma_cross_backtest_strategy_node(
     )
     backtest_provider.set_strategy(strategy)
     backtest_provider.apply_strategy()
+
+    # Instantiate and set risk management strategy
+    risk_management_params = base_config["risk_management"]
+    risk_management = RiskManagement(
+        atr_period=risk_management_params["atr_period"],
+        support_resistance_window=risk_management_params["support_resistance_window"],
+    )
+    backtest_provider.set_risk_management(risk_management)
     backtest_provider.apply_risk_management()
 
     return backtest_provider.data
@@ -48,6 +57,14 @@ def bollinger_bands_backtest_strategy_node(
     )
     backtest_provider.set_strategy(strategy)
     backtest_provider.apply_strategy()
+
+    # Instantiate and set risk management strategy
+    risk_management_params = base_config["risk_management"]
+    risk_management = RiskManagement(
+        atr_period=risk_management_params["atr_period"],
+        support_resistance_window=risk_management_params["support_resistance_window"],
+    )
+    backtest_provider.set_risk_management(risk_management)
     backtest_provider.apply_risk_management()
 
     return backtest_provider.data

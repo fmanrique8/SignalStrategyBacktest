@@ -3,8 +3,6 @@
 
 import pandas as pd
 
-from signalstrategybacktest.utils.risk_management.RiskManagement import RiskManagement
-
 
 class BacktestProvider:
     """A class to handle backtesting operations."""
@@ -25,15 +23,6 @@ class BacktestProvider:
         self.base_config = config
         print("Base configuration loaded successfully!")
 
-        # Initialize risk management strategy
-        risk_management_params = self.base_config["risk_management"]
-        self.risk_management = RiskManagement(
-            atr_period=risk_management_params["atr_period"],
-            support_resistance_window=risk_management_params[
-                "support_resistance_window"
-            ],
-        )
-
     def load_strategy_configuration(self, config: dict):
         """Load the strategy configuration from a dictionary."""
         self.strategy_config = config
@@ -49,6 +38,10 @@ class BacktestProvider:
             self.data = self.strategy.apply(self.data)
         else:
             print("No strategy set!")
+
+    def set_risk_management(self, risk_management):
+        """Set the risk management strategy."""
+        self.risk_management = risk_management
 
     def apply_risk_management(self):
         """Apply the risk management strategy."""
