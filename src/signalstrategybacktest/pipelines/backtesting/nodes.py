@@ -27,6 +27,7 @@ def sma_cross_backtest_strategy_node(
     )
     backtest_provider.set_strategy(strategy)
     backtest_provider.apply_strategy()
+    backtest_provider.apply_risk_management()
 
     return backtest_provider.data
 
@@ -47,5 +48,6 @@ def bollinger_bands_backtest_strategy_node(
     )
     backtest_provider.set_strategy(strategy)
     backtest_provider.apply_strategy()
+    backtest_provider.apply_risk_management()
 
     return backtest_provider.data

@@ -10,7 +10,9 @@ base_configuration:
   commission: 0.0005
   currency: "USD"
   datetime_zone: "America/New_York"
-
+  risk_management:
+    atr_period: 14
+    support_resistance_window: 20
 
 strategies_configuration:
   SmaCross:
