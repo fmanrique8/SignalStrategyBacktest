@@ -6,7 +6,8 @@ generated using Kedro 0.19.6
 from kedro.pipeline import Pipeline, node
 
 from signalstrategybacktest.pipelines.backtesting.nodes import (
-    backtest_base_strategy_node,
+    sma_cross_backtest_strategy_node,
+    bollinger_bands_backtest_strategy_node,
 )
 
 
@@ -15,14 +16,64 @@ def create_pipeline() -> Pipeline:
     return Pipeline(
         [
             node(
-                func=backtest_base_strategy_node,
+                func=sma_cross_backtest_strategy_node,
+                inputs=[
+                    "crypto_source_data",
+                    "params:base_configuration",
+                    "params:strategies_configuration",
+                ],
+                outputs="crypto_sma_cross_backtesting_data",
+                name="backtest_crypto_sma_cross_strategy_node",
+            ),
+            node(
+                func=sma_cross_backtest_strategy_node,
+                inputs=[
+                    "forex_source_data",
+                    "params:base_configuration",
+                    "params:strategies_configuration",
+                ],
+                outputs="forex_sma_cross_backtesting_data",
+                name="backtest_forex_sma_cross_strategy_node",
+            ),
+            node(
+                func=sma_cross_backtest_strategy_node,
                 inputs=[
                     "stocks_source_data",
                     "params:base_configuration",
                     "params:strategies_configuration",
                 ],
-                outputs="stocks_intermediate_data",
-                name="backtest_stocks_base_strategy_node",
+                outputs="stocks_sma_cross_backtesting_data",
+                name="backtest_stocks_sma_cross_strategy_node",
+            ),
+            node(
+                func=bollinger_bands_backtest_strategy_node,
+                inputs=[
+                    "crypto_source_data",
+                    "params:base_configuration",
+                    "params:strategies_configuration",
+                ],
+                outputs="crypto_bollinger_bands_backtesting_data",
+                name="backtest_crypto_bollinger_bands_strategy_node",
+            ),
+            node(
+                func=bollinger_bands_backtest_strategy_node,
+                inputs=[
+                    "forex_source_data",
+                    "params:base_configuration",
+                    "params:strategies_configuration",
+                ],
+                outputs="forex_bollinger_bands_backtesting_data",
+                name="backtest_forex_bollinger_bands_strategy_node",
+            ),
+            node(
+                func=bollinger_bands_backtest_strategy_node,
+                inputs=[
+                    "stocks_source_data",
+                    "params:base_configuration",
+                    "params:strategies_configuration",
+                ],
+                outputs="stocks_bollinger_bands_backtesting_data",
+                name="backtest_stocks_bollinger_bands_strategy_node",
             ),
         ]
     )

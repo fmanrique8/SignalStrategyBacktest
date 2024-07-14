@@ -16,3 +16,6 @@ strategies_configuration:
   SmaCross:
     short_window: 10
     long_window: 30
+  BollingerBands:
+    window: 20
+    num_std_dev: 2

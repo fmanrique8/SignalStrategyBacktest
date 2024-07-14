@@ -7,3 +7,19 @@ forex_source_data:
     sep: ','
   save_args:
     index: False
+
+forex_sma_cross_backtesting_data:
+  type: pandas.CSVDataset
+  filepath: data/02_intermediate/forex/sma-cross/backtesting_data.csv
+  load_args:
+    sep: ','
+  save_args:
+    index: False
+
+forex_bollinger_bands_backtesting_data:
+  type: pandas.CSVDataset
+  filepath: data/02_intermediate/forex/bollinger_bands/backtesting_data.csv
+  load_args:
+    sep: ','
+  save_args:
+    index: False

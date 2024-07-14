@@ -7,3 +7,19 @@ crypto_source_data:
     sep: ','
   save_args:
     index: False
+
+crypto_sma_cross_backtesting_data:
+  type: pandas.CSVDataset
+  filepath: data/02_intermediate/crypto/sma-cross/backtesting_data.csv
+  load_args:
+    sep: ','
+  save_args:
+    index: False
+
+crypto_bollinger_bands_backtesting_data:
+  type: pandas.CSVDataset
+  filepath: data/02_intermediate/crypto/bollinger_bands/backtesting_data.csv
+  load_args:
+    sep: ','
+  save_args:
+    index: False
