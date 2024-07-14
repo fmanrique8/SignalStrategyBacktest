@@ -12,4 +12,7 @@ base_configuration:
   datetime_zone: "America/New_York"
 
 
-
+strategies_configuration:
+  SmaCross:
+    short_window: 10
+    long_window: 30
