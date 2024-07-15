@@ -23,3 +23,20 @@ stocks_bollinger_bands_backtesting_data:
     sep: ','
   save_args:
     index: False
+
+
+stocks_sma_cross_order_book:
+  type: pandas.CSVDataset
+  filepath: data/02_intermediate/stocks/sma-cross/order_book.csv
+  load_args:
+    sep: ','
+  save_args:
+    index: False
+
+stocks_bollinger_bands_order_book:
+  type: pandas.CSVDataset
+  filepath: data/02_intermediate/stocks/bollinger_bands/order_book.csv
+  load_args:
+    sep: ','
+  save_args:
+    index: False

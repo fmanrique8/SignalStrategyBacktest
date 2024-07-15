@@ -13,6 +13,7 @@ class BacktestProvider:
         self.strategy_config = None
         self.strategy = None
         self.risk_management = None
+        self.order_management = None
 
     def load_data(self, df: pd.DataFrame):
         """Load data from a DataFrame."""
@@ -49,3 +50,21 @@ class BacktestProvider:
             self.data = self.risk_management.apply(self.data, initial_cash)
         else:
             print("No risk management strategy set!")
+
+    def set_order_management(self, order_management):
+        """Set the order management system."""
+        self.order_management = order_management
+
+    def apply_order_management(self):
+        """Apply the order management system to track trades."""
+        if self.order_management:
+            self.order_management.apply(self.data)
+        else:
+            print("No order management system set!")
+
+    def get_order_book(self):
+        """Return the order book DataFrame."""
+        if self.order_management:
+            return self.order_management.get_order_book()
+        else:
+            return pd.DataFrame()
