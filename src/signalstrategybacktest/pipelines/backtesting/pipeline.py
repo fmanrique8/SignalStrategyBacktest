@@ -16,19 +16,6 @@ def create_pipeline() -> Pipeline:
     return Pipeline(
         [
             node(
-                func=sma_cross_backtest_strategy_node,
-                inputs=[
-                    "stocks_source_data",
-                    "params:base_configuration",
-                    "params:strategies_configuration",
-                ],
-                outputs=[
-                    "stocks_sma_cross_backtesting_data",
-                    "stocks_sma_cross_order_book",
-                ],
-                name="backtest_stocks_sma_cross_strategy_node",
-            ),
-            node(
                 func=bollinger_bands_backtest_strategy_node,
                 inputs=[
                     "stocks_source_data",
@@ -40,6 +27,19 @@ def create_pipeline() -> Pipeline:
                     "stocks_bollinger_bands_order_book",
                 ],
                 name="backtest_stocks_bollinger_bands_strategy_node",
+            ),
+            node(
+                func=sma_cross_backtest_strategy_node,
+                inputs=[
+                    "stocks_source_data",
+                    "params:base_configuration",
+                    "params:strategies_configuration",
+                ],
+                outputs=[
+                    "stocks_sma_cross_backtesting_data",
+                    "stocks_sma_cross_order_book",
+                ],
+                name="backtest_stocks_sma_cross_strategy_node",
             ),
         ]
     )
