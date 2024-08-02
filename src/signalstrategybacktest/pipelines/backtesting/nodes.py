@@ -43,9 +43,12 @@ def bollinger_bands_backtest_strategy_node(
     backtest_provider.set_risk_management(risk_management)
     backtest_provider.apply_risk_management(initial_cash=base_config["initial_cash"])
 
-    # Instantiate and set order management with slippage and commission rate from base_config
+    # Instantiate and set order management with slippage, commission rate, and close order time from base_config
     order_management = OrderManagement(
-        slippage=base_config["slippage"], commission_rate=base_config["commission"]
+        slippage=base_config["slippage"],
+        commission_rate=base_config["commission"],
+        close_order_time=str(base_config["close_order_time"]),
+        timezone=base_config["datetime_zone"],
     )
     backtest_provider.set_order_management(order_management)
     backtest_provider.apply_order_management()

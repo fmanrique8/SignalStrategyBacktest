@@ -2,19 +2,26 @@
 """
 
 import pandas as pd
-
+import pytz
 from signalstrategybacktest.utils.order_management.utils import (
     calculate_price,
     OrderType,
     create_order,
     generate_order_id,
+    get_next_trading_day_close_time,
 )
 
 
 class OrderManagement:
     """A class to manage orders during backtesting."""
 
-    def __init__(self, slippage=0, commission_rate=0):
+    def __init__(
+        self,
+        slippage=0,
+        commission_rate=0,
+        close_order_time="15:30",
+        timezone="America/New_York",
+    ):
         self.order_book = pd.DataFrame(
             columns=[
                 "order_id",
@@ -34,11 +41,14 @@ class OrderManagement:
         self.slippage = slippage
         self.commission_rate = commission_rate
         self.order_id_counter = 1
+        self.close_order_time = str(close_order_time)
+        self.timezone = timezone
 
     def apply(self, data: pd.DataFrame):
         """Apply order management to track trades."""
         data["Stop_Loss"] = data["Stop_Loss"].ffill().round(2)
         data["Take_Profit"] = data["Take_Profit"].ffill().round(2)
+        data["Datetime"] = pd.to_datetime(data["Datetime"])  # Convert to datetime
 
         for index, row in data.iterrows():
             signal = row["signal"]
@@ -74,6 +84,7 @@ class OrderManagement:
 
             if self.active_orders:
                 self._check_stop_loss_take_profit(timestamp, price)
+                self._check_time_close(timestamp, price)
 
     def _check_stop_loss_take_profit(self, timestamp, price):
         """Check and handle stop loss and take profit conditions."""
@@ -91,8 +102,27 @@ class OrderManagement:
             ):
                 self._close_order(order, timestamp, order["take_profit"], "take_profit")
 
+    def _check_time_close(self, timestamp, price):
+        """Check and handle order closure based on time."""
+        local_tz = pytz.timezone(self.timezone)
+        if timestamp.tzinfo is None:
+            timestamp = local_tz.localize(timestamp)
+
+        for order in self.active_orders[:]:
+            order_timestamp = pd.to_datetime(order["timestamp"])
+            if order_timestamp.tzinfo is None:
+                order_timestamp = local_tz.localize(order_timestamp)
+
+            next_close_time = get_next_trading_day_close_time(
+                order_timestamp, self.close_order_time, self.timezone
+            )
+            if timestamp >= next_close_time:
+                self._close_order(
+                    order, next_close_time.replace(tzinfo=None), price, "time_close"
+                )
+
     def _close_order(self, order, timestamp, price, reason):
-        """Close an active order due to stop loss or take profit."""
+        """Close an active order due to stop loss, take profit, or time."""
         order_type = (
             OrderType.SELL if order["order_type"] == OrderType.BUY else OrderType.BUY
         )

@@ -10,6 +10,7 @@ base_configuration:
   commission: 0.0005
   currency: "USD"
   datetime_zone: "America/New_York"
+  close_order_time: "15:30"
   risk_management:
     atr_period: 14
     support_resistance_window: 20
