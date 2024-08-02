@@ -62,12 +62,18 @@ def generate_order_id(counter: int) -> str:
 def get_next_trading_day_close_time(
     timestamp: datetime, close_time: str, timezone: str
 ) -> datetime:
-    """Get the next trading day's close time."""
+    """Get the next trading day's close time, skipping weekends."""
     local_tz = pytz.timezone(timezone)
     if timestamp.tzinfo is None:
         timestamp = local_tz.localize(timestamp)
     current_day = timestamp.date()
-    next_day = current_day + timedelta(days=1)
+
+    # Determine the next trading day
+    if current_day.weekday() == 4:  # If it's Friday
+        next_day = current_day + timedelta(days=3)  # Skip to Monday
+    else:
+        next_day = current_day + timedelta(days=1)
+
     next_close_time = datetime.combine(
         next_day, datetime.strptime(close_time, "%H:%M").time()
     )
