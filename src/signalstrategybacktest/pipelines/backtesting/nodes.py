@@ -59,7 +59,8 @@ def bollinger_bands_backtest_strategy_node(
     # Calculate performance metrics
     performance_calculator = PerformanceMetrics(
         backtest_provider.get_order_book(),
-        initial_cash=base_config.get("initial_cash", 10000),
+        initial_cash=base_config["initial_cash"],
+        risk_free_rate=base_config["risk_free_rate"],
     )
     metrics = performance_calculator.get_metrics()
 
@@ -107,7 +108,8 @@ def sma_cross_backtest_strategy_node(
     # Calculate performance metrics
     performance_calculator = PerformanceMetrics(
         backtest_provider.get_order_book(),
-        initial_cash=base_config.get("initial_cash", 10000),
+        initial_cash=base_config["initial_cash"],
+        risk_free_rate=base_config["risk_free_rate"],
     )
     metrics = performance_calculator.get_metrics()
 
