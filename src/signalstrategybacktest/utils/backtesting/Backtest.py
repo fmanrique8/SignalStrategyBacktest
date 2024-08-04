@@ -44,10 +44,12 @@ class BacktestProvider:
         """Set the risk management strategy."""
         self.risk_management = risk_management
 
-    def apply_risk_management(self, initial_cash):
+    def apply_risk_management(self):
         """Apply the risk management strategy."""
         if self.risk_management:
-            self.data = self.risk_management.apply(self.data, initial_cash)
+            self.data = self.risk_management.apply(
+                self.data, self.base_config["initial_cash"]
+            )
         else:
             print("No risk management strategy set!")
 
@@ -68,13 +70,3 @@ class BacktestProvider:
             return self.order_management.get_order_book()
         else:
             return pd.DataFrame()
-
-    def get_performance_metrics(self) -> dict:
-        """Calculate and return performance metrics from the order book."""
-        order_book = self.get_order_book()
-        if order_book.empty:
-            print("Order book is empty!")
-            return {}
-
-        metrics = {}
-        return metrics

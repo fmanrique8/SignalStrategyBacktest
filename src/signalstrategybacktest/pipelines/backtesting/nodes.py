@@ -44,7 +44,7 @@ def bollinger_bands_backtest_strategy_node(
         distance_level=risk_management_params["distance_level"],
     )
     backtest_provider.set_risk_management(risk_management)
-    backtest_provider.apply_risk_management(initial_cash=base_config["initial_cash"])
+    backtest_provider.apply_risk_management()
 
     # Instantiate and set order management with slippage, commission rate, and close order time from base_config
     order_management = OrderManagement(
@@ -92,7 +92,7 @@ def sma_cross_backtest_strategy_node(
         distance_level=risk_management_params["distance_level"],
     )
     backtest_provider.set_risk_management(risk_management)
-    backtest_provider.apply_risk_management(initial_cash=base_config["initial_cash"])
+    backtest_provider.apply_risk_management()
 
     # Instantiate and set order management with slippage, commission rate, and close order time from base_config
     order_management = OrderManagement(

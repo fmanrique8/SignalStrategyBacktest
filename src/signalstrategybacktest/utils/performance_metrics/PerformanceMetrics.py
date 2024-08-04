@@ -2,13 +2,19 @@
 """
 
 import pandas as pd
-import json
+
+from signalstrategybacktest.utils.performance_metrics.utils import (
+    calculate_total_return,
+    calculate_average_return_per_trade,
+    calculate_final_portfolio_value,
+    calculate_total_profit,
+)
 
 
 class PerformanceMetrics:
     """A class to calculate and return performance metrics from the order book."""
 
-    def __init__(self, order_book: pd.DataFrame, initial_cash: float = 10000.0):
+    def __init__(self, order_book: pd.DataFrame, initial_cash: float):
         self.order_book = order_book
         self.initial_cash = initial_cash
 
@@ -44,11 +50,12 @@ class PerformanceMetrics:
                         total_trades += 1
                         symbol_cash += profit * buy_price
 
-            total_return = (symbol_cash - self.initial_cash) / self.initial_cash * 100
-            average_return_per_trade = (
-                total_profit / total_trades if total_trades > 0 else 0
+            total_return = calculate_total_return(self.initial_cash, symbol_cash)
+            average_return_per_trade = calculate_average_return_per_trade(
+                total_profit, total_trades
             )
-            final_portfolio_value = symbol_cash
+            final_portfolio_value = calculate_final_portfolio_value(symbol_cash)
+            total_profit = calculate_total_profit(total_profit)
 
             performance_metrics[symbol] = {
                 "total_profit": total_profit,
