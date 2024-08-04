@@ -25,6 +25,7 @@ def create_pipeline() -> Pipeline:
                 outputs=[
                     "stocks_bollinger_bands_backtesting_data",
                     "stocks_bollinger_bands_order_book",
+                    "stocks_bollinger_bands_performance_metrics_json",
                 ],
                 name="backtest_stocks_bollinger_bands_strategy_node",
             ),
@@ -38,6 +39,7 @@ def create_pipeline() -> Pipeline:
                 outputs=[
                     "stocks_sma_cross_backtesting_data",
                     "stocks_sma_cross_order_book",
+                    "stocks_sma_cross_performance_metrics_json",
                 ],
                 name="backtest_stocks_sma_cross_strategy_node",
             ),

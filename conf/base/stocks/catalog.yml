@@ -40,3 +40,15 @@ stocks_bollinger_bands_order_book:
     sep: ','
   save_args:
     index: False
+
+stocks_bollinger_bands_performance_metrics_json:
+  type: json.JSONDataset
+  filepath: data/02_intermediate/stocks/bollinger_bands/performance_metrics.json
+  save_args:
+    indent: 4
+
+stocks_sma_cross_performance_metrics_json:
+  type: json.JSONDataset
+  filepath: data/02_intermediate/stocks/sma-cross/performance_metrics.json
+  save_args:
+    indent: 4

@@ -8,6 +8,9 @@ from signalstrategybacktest.utils.backtesting.Backtest import BacktestProvider
 from signalstrategybacktest.utils.order_management.OrderManagement import (
     OrderManagement,
 )
+from signalstrategybacktest.utils.performance_metrics.PerformanceMetrics import (
+    PerformanceMetrics,
+)
 from signalstrategybacktest.utils.risk_management.RiskManagement import RiskManagement
 from signalstrategybacktest.utils.technical_indicators.BollingerBands import (
     BollingerBandsStrategy,
@@ -53,7 +56,14 @@ def bollinger_bands_backtest_strategy_node(
     backtest_provider.set_order_management(order_management)
     backtest_provider.apply_order_management()
 
-    return backtest_provider.data, backtest_provider.get_order_book()
+    # Calculate performance metrics
+    performance_calculator = PerformanceMetrics(
+        backtest_provider.get_order_book(),
+        initial_cash=base_config.get("initial_cash", 10000),
+    )
+    metrics = performance_calculator.get_metrics()
+
+    return backtest_provider.data, backtest_provider.get_order_book(), metrics
 
 
 def sma_cross_backtest_strategy_node(
@@ -94,4 +104,11 @@ def sma_cross_backtest_strategy_node(
     backtest_provider.set_order_management(order_management)
     backtest_provider.apply_order_management()
 
-    return backtest_provider.data, backtest_provider.get_order_book()
+    # Calculate performance metrics
+    performance_calculator = PerformanceMetrics(
+        backtest_provider.get_order_book(),
+        initial_cash=base_config.get("initial_cash", 10000),
+    )
+    metrics = performance_calculator.get_metrics()
+
+    return backtest_provider.data, backtest_provider.get_order_book(), metrics

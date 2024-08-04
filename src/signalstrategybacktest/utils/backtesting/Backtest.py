@@ -68,3 +68,13 @@ class BacktestProvider:
             return self.order_management.get_order_book()
         else:
             return pd.DataFrame()
+
+    def get_performance_metrics(self) -> dict:
+        """Calculate and return performance metrics from the order book."""
+        order_book = self.get_order_book()
+        if order_book.empty:
+            print("Order book is empty!")
+            return {}
+
+        metrics = {}
+        return metrics
