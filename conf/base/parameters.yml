@@ -5,7 +5,7 @@
 # Link: https://docs.kedro.org/en/0.19.6/configuration/parameters.html
 
 base_configuration:
-  initial_cash: 100000.0
+  initial_cash: 10000.0
   risk_free_rate: 0.01
   slippage: 0.001
   commission: 0.0005

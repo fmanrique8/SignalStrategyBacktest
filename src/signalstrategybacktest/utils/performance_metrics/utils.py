@@ -28,9 +28,9 @@ def calculate_max_drawdown(daily_returns: list) -> float:
     """Calculate maximum drawdown."""
     cumulative_returns = np.cumsum(daily_returns)
     peak = np.maximum.accumulate(cumulative_returns)
-    drawdown = cumulative_returns - peak
+    drawdown = (cumulative_returns - peak) / peak
     max_drawdown = np.min(drawdown)
-    return round(max_drawdown, 2)
+    return round(max_drawdown * 100, 2)
 
 
 def calculate_sharpe_ratio(daily_returns: list, risk_free_rate: float) -> float:
