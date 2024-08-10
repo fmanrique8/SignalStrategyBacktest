@@ -60,7 +60,13 @@ class OrderManagement:
             stop_loss = row["Stop_Loss"]
             take_profit = row["Take_Profit"]
 
-            if signal != 0:
+            # Ensure position is checked before placing a new order
+            closed_position = self.manage_existing_position(
+                signal, position, price, timestamp
+            )
+
+            # Place a new order only if the position has changed or if no position was previously held
+            if signal != 0 and not closed_position:
                 order_type = OrderType.BUY if signal == 1 else OrderType.SELL
                 order_id = generate_order_id(self.order_id_counter)
                 self.order_id_counter += 1
@@ -143,6 +149,25 @@ class OrderManagement:
         self.active_orders = [
             o for o in self.active_orders if o["order_id"] != order["order_id"]
         ]  # Remove the order from active orders
+
+    def manage_existing_position(self, signal, position, price, timestamp):
+        """Manages existing positions before placing new orders."""
+        if self.active_orders:
+            active_order = self.active_orders[0]
+            existing_order_type = active_order["order_type"]
+
+            # Close an existing order if the signal is opposite to the current position
+            if (signal == 1 and existing_order_type == OrderType.SELL) or (
+                signal == -1 and existing_order_type == OrderType.BUY
+            ):
+                self._close_order(active_order, timestamp, price, "signal_reversal")
+                return True  # Indicate that an order was closed
+
+        # If a position is already active and matches the signal, do nothing
+        if (position == 1 and signal == 1) or (position == -1 and signal == -1):
+            return True  # No need to open a new order
+
+        return False  # No position was closed, and a new order might be needed
 
     def get_order_book(self):
         """Return the order book DataFrame."""

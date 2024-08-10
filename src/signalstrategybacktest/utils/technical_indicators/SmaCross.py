@@ -21,13 +21,27 @@ class SmaCrossStrategy:
             df["Close"].rolling(window=self.long_window, min_periods=1).mean()
         )
         df["signal"] = 0
+
+        # Generate signals when the short moving average crosses the long moving average
         df.loc[df.index[self.short_window :], "signal"] = np.where(
             df["short_mavg"][self.short_window :]
             > df["long_mavg"][self.short_window :],
             1,
-            0,
+            np.where(
+                df["short_mavg"][self.short_window :]
+                < df["long_mavg"][self.short_window :],
+                -1,
+                0,
+            ),
         )
-        df["position"] = df["signal"].diff()
+
+        # Ensure that signals are generated only when there is a crossover (not continuously)
+        df["signal"] = df["signal"].diff().fillna(0)
+
+        # Update positions based on the signal
+        df["position"] = (
+            df["signal"].cumsum().clip(-1, 1)
+        )  # Ensures positions are -1, 0, or 1
 
         # Round relevant columns to 2 decimal places
         df["short_mavg"] = df["short_mavg"].round(2)
