@@ -50,7 +50,6 @@ def bollinger_bands_backtest_strategy_node(
     order_management = OrderManagement(
         slippage=base_config["slippage"],
         commission_rate=base_config["commission"],
-        close_order_time=str(base_config["close_order_time"]),
         timezone=base_config["datetime_zone"],
     )
     backtest_provider.set_order_management(order_management)
@@ -71,6 +70,9 @@ def sma_cross_backtest_strategy_node(
     df: pd.DataFrame, base_config: dict, strategy_config: dict
 ) -> tuple:
     """Runs backtest using SMA crossover strategy on given data and configurations."""
+    if df.empty:
+        raise ValueError("Input DataFrame is empty, cannot perform backtest.")
+
     backtest_provider = BacktestProvider()
     backtest_provider.load_data(df)
     backtest_provider.load_base_configuration(base_config)
@@ -84,7 +86,6 @@ def sma_cross_backtest_strategy_node(
     backtest_provider.set_strategy(strategy)
     backtest_provider.apply_strategy()
 
-    # Instantiate and set risk management strategy
     risk_management_params = base_config["risk_management"]
     risk_management = RiskManagement(
         atr_period=risk_management_params["atr_period"],
@@ -95,17 +96,14 @@ def sma_cross_backtest_strategy_node(
     backtest_provider.set_risk_management(risk_management)
     backtest_provider.apply_risk_management()
 
-    # Instantiate and set order management with slippage, commission rate, and close order time from base_config
     order_management = OrderManagement(
         slippage=base_config["slippage"],
         commission_rate=base_config["commission"],
-        close_order_time=str(base_config["close_order_time"]),
         timezone=base_config["datetime_zone"],
     )
     backtest_provider.set_order_management(order_management)
     backtest_provider.apply_order_management()
 
-    # Calculate performance metrics
     performance_calculator = PerformanceMetrics(
         backtest_provider.get_order_book(),
         initial_cash=base_config["initial_cash"],

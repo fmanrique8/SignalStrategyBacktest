@@ -14,6 +14,9 @@ class SmaCrossStrategy:
 
     def apply(self, df: pd.DataFrame) -> pd.DataFrame:
         """Apply the SMA crossover strategy to generate buy/sell signals."""
+        if df.empty:
+            raise ValueError("Input DataFrame is empty, cannot apply strategy.")
+
         df["short_mavg"] = (
             df["Close"].rolling(window=self.short_window, min_periods=1).mean()
         )

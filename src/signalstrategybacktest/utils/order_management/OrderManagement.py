@@ -2,13 +2,11 @@
 """
 
 import pandas as pd
-import pytz
 from signalstrategybacktest.utils.order_management.utils import (
     calculate_price,
     OrderType,
     create_order,
     generate_order_id,
-    get_next_trading_day_close_time,
 )
 
 
@@ -19,7 +17,6 @@ class OrderManagement:
         self,
         slippage=0,
         commission_rate=0,
-        close_order_time="15:30",
         timezone="America/New_York",
     ):
         self.order_book = pd.DataFrame(
@@ -27,6 +24,7 @@ class OrderManagement:
                 "order_id",
                 "timestamp",
                 "symbol",
+                "position_type",
                 "order_type",
                 "quantity",
                 "price",
@@ -41,14 +39,16 @@ class OrderManagement:
         self.slippage = slippage
         self.commission_rate = commission_rate
         self.order_id_counter = 1
-        self.close_order_time = str(close_order_time)
         self.timezone = timezone
 
     def apply(self, data: pd.DataFrame):
         """Apply order management to track trades."""
+        if data.empty:
+            raise ValueError("Input DataFrame is empty, cannot apply order management.")
+
         data["Stop_Loss"] = data["Stop_Loss"].ffill().round(2)
         data["Take_Profit"] = data["Take_Profit"].ffill().round(2)
-        data["Datetime"] = pd.to_datetime(data["Datetime"])  # Convert to datetime
+        data["Datetime"] = pd.to_datetime(data["Datetime"])
 
         for index, row in data.iterrows():
             signal = row["signal"]
@@ -60,14 +60,13 @@ class OrderManagement:
             stop_loss = row["Stop_Loss"]
             take_profit = row["Take_Profit"]
 
-            # Ensure position is checked before placing a new order
             closed_position = self.manage_existing_position(
                 signal, position, price, timestamp
             )
 
-            # Place a new order only if the position has changed or if no position was previously held
-            if signal != 0 and not closed_position:
+            if signal != 0 and (not closed_position or position == 0):
                 order_type = OrderType.BUY if signal == 1 else OrderType.SELL
+                position_type = "Long" if signal == 1 else "Short"
                 order_id = generate_order_id(self.order_id_counter)
                 self.order_id_counter += 1
                 order = create_order(
@@ -83,14 +82,18 @@ class OrderManagement:
                     take_profit,
                     "signal",
                 )
-                self.order_book = pd.concat([self.order_book, order], ignore_index=True)
-                self.active_orders.append(
-                    order.iloc[0].to_dict()
-                )  # Add the order to active orders as a dictionary
+                order["position_type"] = position_type
+
+                order = order.dropna(how="all", axis=1)
+                if not order.empty:
+                    self.order_book = pd.concat(
+                        [self.order_book, order], ignore_index=True
+                    )
+
+                self.active_orders.append(order.iloc[0].to_dict())
 
             if self.active_orders:
                 self._check_stop_loss_take_profit(timestamp, price)
-                self._check_time_close(timestamp, price)
 
     def _check_stop_loss_take_profit(self, timestamp, price):
         """Check and handle stop loss and take profit conditions."""
@@ -108,27 +111,8 @@ class OrderManagement:
             ):
                 self._close_order(order, timestamp, order["take_profit"], "take_profit")
 
-    def _check_time_close(self, timestamp, price):
-        """Check and handle order closure based on time."""
-        local_tz = pytz.timezone(self.timezone)
-        if timestamp.tzinfo is None:
-            timestamp = local_tz.localize(timestamp)
-
-        for order in self.active_orders[:]:
-            order_timestamp = pd.to_datetime(order["timestamp"])
-            if order_timestamp.tzinfo is None:
-                order_timestamp = local_tz.localize(order_timestamp)
-
-            next_close_time = get_next_trading_day_close_time(
-                order_timestamp, self.close_order_time, self.timezone
-            )
-            if timestamp >= next_close_time:
-                self._close_order(
-                    order, next_close_time.replace(tzinfo=None), price, "time_close"
-                )
-
     def _close_order(self, order, timestamp, price, reason):
-        """Close an active order due to stop loss, take profit, or time."""
+        """Close an active order due to stop loss, take profit."""
         order_type = (
             OrderType.SELL if order["order_type"] == OrderType.BUY else OrderType.BUY
         )
@@ -145,10 +129,17 @@ class OrderManagement:
             order["take_profit"],
             reason,
         )
-        self.order_book = pd.concat([self.order_book, close_order], ignore_index=True)
+        close_order["position_type"] = order["position_type"]
+
+        close_order = close_order.dropna(how="all", axis=1)
+        if not close_order.empty:
+            self.order_book = pd.concat(
+                [self.order_book, close_order], ignore_index=True
+            )
+
         self.active_orders = [
             o for o in self.active_orders if o["order_id"] != order["order_id"]
-        ]  # Remove the order from active orders
+        ]
 
     def manage_existing_position(self, signal, position, price, timestamp):
         """Manages existing positions before placing new orders."""
@@ -156,18 +147,16 @@ class OrderManagement:
             active_order = self.active_orders[0]
             existing_order_type = active_order["order_type"]
 
-            # Close an existing order if the signal is opposite to the current position
             if (signal == 1 and existing_order_type == OrderType.SELL) or (
                 signal == -1 and existing_order_type == OrderType.BUY
             ):
                 self._close_order(active_order, timestamp, price, "signal_reversal")
-                return True  # Indicate that an order was closed
+                return True
 
-        # If a position is already active and matches the signal, do nothing
         if (position == 1 and signal == 1) or (position == -1 and signal == -1):
-            return True  # No need to open a new order
+            return True
 
-        return False  # No position was closed, and a new order might be needed
+        return False
 
     def get_order_book(self):
         """Return the order book DataFrame."""

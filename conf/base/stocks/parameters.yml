@@ -7,8 +7,4 @@
 stocks_configuration:
   time_interval: "15m"
   symbols:
-    - "AAPL"
-    - "GOOGL"
-    - "MSFT"
-    - "AMZN"
-    - "TSLA"
+    - "SPY"

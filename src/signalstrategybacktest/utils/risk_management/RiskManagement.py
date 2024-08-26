@@ -38,8 +38,9 @@ class RiskManagement:
             axis=1,
         )
 
-        df["Stop_Loss"].fillna(method="bfill", inplace=True)
-        df["Take_Profit"].fillna(method="bfill", inplace=True)
+        # Use .bfill() instead of fillna(method="bfill")
+        df.loc[:, "Stop_Loss"] = df["Stop_Loss"].bfill().round(2)
+        df.loc[:, "Take_Profit"] = df["Take_Profit"].bfill().round(2)
 
         df["Position_Size"] = df.apply(
             lambda row: self.calculate_position_size(row, initial_cash), axis=1
@@ -55,9 +56,9 @@ class RiskManagement:
         ranges = pd.concat([high_low, high_close, low_close], axis=1)
         true_range = ranges.max(axis=1)
         atr = true_range.rolling(self.atr_period).mean()
-        return atr.fillna(method="bfill").round(
-            2
-        )  # Fill NaN values and round to 2 decimals
+
+        # Use .bfill() instead of fillna(method="bfill")
+        return atr.bfill().round(2)
 
     def calculate_support_resistance(self, df: pd.DataFrame) -> (pd.Series, pd.Series):
         """Calculate support and resistance levels."""
@@ -69,11 +70,8 @@ class RiskManagement:
         support = support - (support * self.distance_level)
         resistance = resistance + (resistance * self.distance_level)
 
-        return support.fillna(method="bfill").round(2), resistance.fillna(
-            method="bfill"
-        ).round(
-            2
-        )  # Handle NaN values and round
+        # Use .bfill() instead of fillna(method="bfill")
+        return support.bfill().round(2), resistance.bfill().round(2)
 
     def calculate_position_size(self, row, initial_cash):
         """Calculate position size based on risk per trade."""

@@ -2,7 +2,7 @@
 """
 
 import pandas as pd
-
+from signalstrategybacktest.utils.order_management.utils import OrderType
 from signalstrategybacktest.utils.performance_metrics.utils import (
     calculate_total_return,
     calculate_average_return_per_trade,
@@ -31,76 +31,95 @@ class PerformanceMetrics:
         self.risk_free_rate = risk_free_rate
 
     def calculate_metrics(self) -> dict:
-        """Calculate performance metrics for each symbol."""
+        """Calculate performance metrics for each symbol and each position type (long/short)."""
         symbols = self.order_book["symbol"].unique()
         performance_metrics = {}
 
         for symbol in symbols:
-            symbol_orders = self.order_book[self.order_book["symbol"] == symbol]
-            symbol_cash = self.initial_cash
-            total_profit = 0
-            total_trades = 0
-            win_trades = 0
-            loss_trades = 0
-            gross_profit = 0
-            gross_loss = 0
-            daily_returns = []
+            performance_metrics[symbol] = {}
+            for position_type in ["Long", "Short"]:
+                symbol_orders = self.order_book[
+                    (self.order_book["symbol"] == symbol)
+                    & (self.order_book["position_type"] == position_type)
+                ]
+                if symbol_orders.empty:
+                    continue
 
-            order_ids = symbol_orders["order_id"].unique()
+                symbol_cash = self.initial_cash
+                total_profit = 0
+                total_trades = 0
+                win_trades = 0
+                loss_trades = 0
+                gross_profit = 0
+                gross_loss = 0
+                daily_returns = []
 
-            for order_id in order_ids:
-                orders = symbol_orders[symbol_orders["order_id"] == order_id]
-                if len(orders) == 2:
-                    buy_order = orders[orders["order_type"] == "buy"].iloc[0]
-                    sell_order = orders[orders["order_type"] == "sell"].iloc[0]
+                order_ids = symbol_orders["order_id"].unique()
 
-                    if (
-                        buy_order["execution_price"] > 0
-                        and sell_order["execution_price"] > 0
-                    ):
-                        buy_price = buy_order["execution_price"]
-                        sell_price = sell_order["execution_price"]
-                        quantity = buy_order["quantity"]
+                for order_id in order_ids:
+                    orders = symbol_orders[symbol_orders["order_id"] == order_id]
+                    if len(orders) == 2:
+                        buy_order = orders[orders["order_type"] == OrderType.BUY].iloc[
+                            0
+                        ]
+                        sell_order = orders[
+                            orders["order_type"] == OrderType.SELL
+                        ].iloc[0]
 
-                        profit = (sell_price - buy_price) * (quantity / buy_price)
-                        total_profit += profit
-                        total_trades += 1
-                        symbol_cash += profit * buy_price
-                        daily_returns.append(profit / self.initial_cash)
+                        if (
+                            buy_order["execution_price"] > 0
+                            and sell_order["execution_price"] > 0
+                        ):
+                            buy_price = buy_order["execution_price"]
+                            sell_price = sell_order["execution_price"]
+                            quantity = buy_order["quantity"]
 
-                        if profit > 0:
-                            win_trades += 1
-                            gross_profit += profit
-                        else:
-                            loss_trades += 1
-                            gross_loss += abs(profit)
+                            profit = (sell_price - buy_price) * (quantity / buy_price)
+                            total_profit += profit
+                            total_trades += 1
+                            symbol_cash += profit * buy_price
+                            daily_returns.append(profit / self.initial_cash)
 
-            total_return = calculate_total_return(self.initial_cash, symbol_cash)
-            average_return_per_trade = calculate_average_return_per_trade(
-                total_profit, total_trades
-            )
-            final_portfolio_value = calculate_final_portfolio_value(symbol_cash)
-            total_profit = calculate_total_profit(total_profit)
-            max_drawdown = calculate_max_drawdown(daily_returns)
-            sharpe_ratio = calculate_sharpe_ratio(daily_returns, self.risk_free_rate)
-            sortino_ratio = calculate_sortino_ratio(daily_returns, self.risk_free_rate)
-            win_rate = calculate_win_rate(win_trades, total_trades)
-            loss_rate = calculate_loss_rate(loss_trades, total_trades)
-            profit_factor = calculate_profit_factor(gross_profit, gross_loss)
+                            if profit > 0:
+                                win_trades += 1
+                                gross_profit += profit
+                            else:
+                                loss_trades += 1
+                                gross_loss += abs(profit)
 
-            performance_metrics[symbol] = {
-                "total_profit": total_profit,
-                "total_trades": total_trades,
-                "average_return_per_trade": average_return_per_trade,
-                "final_portfolio_value": final_portfolio_value,
-                "total_return": total_return,
-                "max_drawdown": max_drawdown,
-                "sharpe_ratio": sharpe_ratio,
-                "sortino_ratio": sortino_ratio,
-                "win_rate": win_rate,
-                "loss_rate": loss_rate,
-                "profit_factor": profit_factor,
-            }
+                if total_trades == 0:
+                    continue
+
+                total_return = calculate_total_return(self.initial_cash, symbol_cash)
+                average_return_per_trade = calculate_average_return_per_trade(
+                    total_profit, total_trades
+                )
+                final_portfolio_value = calculate_final_portfolio_value(symbol_cash)
+                total_profit = calculate_total_profit(total_profit)
+                max_drawdown = calculate_max_drawdown(daily_returns)
+                sharpe_ratio = calculate_sharpe_ratio(
+                    daily_returns, self.risk_free_rate
+                )
+                sortino_ratio = calculate_sortino_ratio(
+                    daily_returns, self.risk_free_rate
+                )
+                win_rate = calculate_win_rate(win_trades, total_trades)
+                loss_rate = calculate_loss_rate(loss_trades, total_trades)
+                profit_factor = calculate_profit_factor(gross_profit, gross_loss)
+
+                performance_metrics[symbol][position_type] = {
+                    "total_profit": total_profit,
+                    "total_trades": total_trades,
+                    "average_return_per_trade": average_return_per_trade,
+                    "final_portfolio_value": final_portfolio_value,
+                    "total_return": total_return,
+                    "max_drawdown": max_drawdown,
+                    "sharpe_ratio": sharpe_ratio,
+                    "sortino_ratio": sortino_ratio,
+                    "win_rate": win_rate,
+                    "loss_rate": loss_rate,
+                    "profit_factor": profit_factor,
+                }
 
         return performance_metrics
 
