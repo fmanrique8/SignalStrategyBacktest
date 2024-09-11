@@ -17,10 +17,10 @@ def select_base_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df[["Datetime", "Open", "High", "Low", "Close", "Volume", "Symbol"]]
 
 
-def fetch_symbol_data(symbol: str, interval: str) -> pd.DataFrame:
-    """Fetch data for a single symbol."""
+def fetch_symbol_data(symbol: str, interval: str, start: str, end: str) -> pd.DataFrame:
+    """Fetch data for a single symbol within a date range."""
     ticker = yf.Ticker(symbol)
-    hist = ticker.history(interval=interval)
+    hist = ticker.history(interval=interval, start=start, end=end)
     if not hist.empty:
         hist["Symbol"] = symbol
         return hist
@@ -29,12 +29,14 @@ def fetch_symbol_data(symbol: str, interval: str) -> pd.DataFrame:
 
 
 async def async_fetch_symbol_data(
-    symbol: str, interval: str, executor: ThreadPoolExecutor
+    symbol: str, interval: str, start: str, end: str, executor: ThreadPoolExecutor
 ) -> pd.DataFrame:
     """Fetch data for a single symbol asynchronously using threads."""
     loop = asyncio.get_event_loop()
     try:
-        df = await loop.run_in_executor(executor, fetch_symbol_data, symbol, interval)
+        df = await loop.run_in_executor(
+            executor, fetch_symbol_data, symbol, interval, start, end
+        )
         return df
     except FetchError as e:
         logger.error(e.message)

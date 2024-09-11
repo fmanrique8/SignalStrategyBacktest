@@ -22,4 +22,6 @@ async def fetch_data_async(
 def fetch_data(config: Dict[str, Any], base_config: Dict[str, Any]) -> pd.DataFrame:
     """Fetch data based on provided configuration."""
     loop = asyncio.get_event_loop()
+    if loop.is_running():
+        return asyncio.run(fetch_data_async(config, base_config))
     return loop.run_until_complete(fetch_data_async(config, base_config))

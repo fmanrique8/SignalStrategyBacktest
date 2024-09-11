@@ -5,6 +5,8 @@
 # Link: https://docs.kedro.org/en/0.19.6/configuration/parameters.html
 
 stocks_configuration:
-  time_interval: "15m"
+  time_interval: "5m"
   symbols:
     - "SPY"
+  date_range:
+    days_ago: 30

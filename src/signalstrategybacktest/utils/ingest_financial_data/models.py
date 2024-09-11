@@ -2,7 +2,7 @@
 """
 
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Dict
 
 
 class BaseConfig(BaseModel):
@@ -10,3 +10,4 @@ class BaseConfig(BaseModel):
 
     time_interval: str = Field(..., pattern=r"^\d+[mhdw]$")
     symbols: List[str]
+    date_range: Dict[str, int]
