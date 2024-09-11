@@ -9,4 +9,4 @@ stocks_configuration:
   symbols:
     - "SPY"
   date_range:
-    days_ago: 30
+    days_ago: 59
